@@ -18,7 +18,7 @@ mongoose
   .then(() => console.log('Connected to AC Automatic DB!'))
   .catch(() => 'Failed to connect to DB')
 
-app.use('/api/device', deviceRouter)
+app.use('/api/devices', deviceRouter)
 
 app.listen(PORT, () => {
   console.log('SERVER IS UP ON PORT:', PORT)
