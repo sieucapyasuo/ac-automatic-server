@@ -8,7 +8,7 @@ export const enum BRAND {
   PANASONIC = 'PANASONIC'
 }
 
-export const enum MODE {
+export enum MODE {
   COOLING = 'COOLING',
   DEFAULT = 'DEFAULT',
   MOISTURING = 'MOISTURING'

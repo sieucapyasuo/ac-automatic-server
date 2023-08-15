@@ -6,4 +6,8 @@ const router = express.Router()
 
 router.get('/', deviceController.getAllDevices)
 
+router.get('/:id', deviceController.getSingleDevice)
+
+router.post('/', deviceController.linkNewDevice)
+
 export default router

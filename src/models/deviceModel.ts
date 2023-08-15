@@ -2,18 +2,21 @@ import mongoose, { Document, Schema } from 'mongoose'
 
 import { BRAND, MODE, STATUS, FANSPEED } from '@/constants/enum'
 
+interface IProfile {
+  temp: number
+  fan: FANSPEED
+}
+
 export interface IDevice extends Document {
   userId: string
+  name: string
   status: STATUS
   fan: FANSPEED
   temp: number
   brand: BRAND
   currentProfile: MODE
   profile: {
-    [key in MODE]: {
-      temp: number
-      fan: FANSPEED
-    }
+    [key in MODE]: IProfile
   }
   envTemp: number
   humidity: number
@@ -21,6 +24,12 @@ export interface IDevice extends Document {
 
 const deviceSchema = new Schema<IDevice>({
   userId: String,
+  name: {
+    type: String,
+    required: function () {
+      return this.name.trim()
+    }
+  },
   status: {
     type: String,
     default: STATUS.OFF
