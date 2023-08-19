@@ -3,7 +3,9 @@ import { Request, Response } from 'express'
 import LinkDeviceRequest from '@/models/requests/linkDeviceRequest'
 import deviceService from '@/services/deviceService'
 
-import isLinkRequestValid from '@/utils/validateLinkRequest'
+import { isLinkRequestValid, isSendSignalRequest, isSetDeviceRequestValid } from '@/utils/validateRequest'
+import SetDeviceRequest from '@/models/requests/setDeviceRequest'
+import SendSignalRequest from '@/models/requests/sendSignalRequest'
 
 const getAllDevices = async (_: Request, res: Response) => {
   try {
@@ -36,4 +38,28 @@ const linkNewDevice = async (req: Request, res: Response) => {
   }
 }
 
-export default { getAllDevices, getSingleDevice, linkNewDevice }
+const powerDevice = async (req: Request, res: Response) => {
+  try {
+    const setDeviceRequest = <SetDeviceRequest>req.body
+    setDeviceRequest.deviceId = req.params.id
+    if (!isSetDeviceRequestValid(setDeviceRequest)) throw Error('Missing field(s)')
+    await deviceService.setDevice(setDeviceRequest)
+    res.json({ message: 'Successfully set device' })
+  } catch (error) {
+    if (error instanceof Error) res.status(400).send({ message: error.message })
+  }
+}
+
+const sendSignal = async (req: Request, res: Response) => {
+  try {
+    const sendSignalRequest = <SendSignalRequest>req.body
+    sendSignalRequest.deviceId = req.params.id
+    if (!isSendSignalRequest(sendSignalRequest)) throw Error('Missing field(s)')
+    await deviceService.sendSignal(sendSignalRequest)
+    res.json({ message: 'Successfully send signal' })
+  } catch (error) {
+    if (error instanceof Error) res.status(400).send({ message: error.message })
+  }
+}
+
+export default { getAllDevices, getSingleDevice, linkNewDevice, powerDevice, sendSignal }

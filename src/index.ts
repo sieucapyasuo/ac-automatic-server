@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import express, { Application } from 'express'
 import mongoose from 'mongoose'
+import cors from 'cors'
 
 import deviceRouter from '@/routes/deviceRoute'
 
@@ -11,7 +12,9 @@ const DB_NAME = process.env.DB_NAME
 const PORT = process.env.PORT
 
 const app: Application = express()
+
 app.use(express.json())
+app.use(cors())
 
 mongoose
   .connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`)
