@@ -62,4 +62,13 @@ const sendSignal = async (req: Request, res: Response) => {
   }
 }
 
-export default { getAllDevices, getSingleDevice, linkNewDevice, powerDevice, sendSignal }
+const getStats = async (req: Request, res: Response) => {
+  try {
+    await deviceService.getStats(req.params.id)
+    res.json({ message: 'Successfully get stats !' })
+  } catch (error) {
+    if (error instanceof Error) res.status(400).send({ message: error.message })
+  }
+}
+
+export default { getAllDevices, getSingleDevice, linkNewDevice, powerDevice, sendSignal, getStats }
