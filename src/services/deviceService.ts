@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 
 import { espApiUrl } from '@/constants/espApiUrl'
 
@@ -6,6 +6,7 @@ import LinkDeviceRequest from '@/models/requests/linkDeviceRequest'
 import DeviceModel, { IDevice } from '@/models/deviceModel'
 import SetDeviceRequest from '@/models/requests/setDeviceRequest'
 import SendSignalRequest from '@/models/requests/sendSignalRequest'
+import StatsResponse from '@/models/responses/statsResponse'
 
 type DeviceList = IDevice[]
 
@@ -75,10 +76,31 @@ const setDevice = async (setDeviceRequest: SetDeviceRequest) => {
   }
 }
 
+const getStats = async (deviceId: string) => {
+  try {
+    type Device = IDevice | null
+
+    const device: Device = await DeviceModel.findById(deviceId)
+
+    if (device != null) {
+      const stats: AxiosResponse<StatsResponse> = await axios.get(`${espApiUrl}/stats`)
+
+      device.envTemp = stats.data.temp
+      device.humidity = stats.data.humidity
+
+      device.save()
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) throw new Error('Cannot send signal !')
+    if (error instanceof Error) throw new Error('Cannot find device !')
+  }
+}
+
 export default {
   getDeviceList,
   getSingleDevice,
   createNewDevice,
   setDevice,
-  sendSignal
+  sendSignal,
+  getStats
 }
