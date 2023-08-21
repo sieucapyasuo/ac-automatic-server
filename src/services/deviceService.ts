@@ -89,6 +89,12 @@ const getStats = async (deviceId: string) => {
       device.humidity = stats.data.humidity
 
       device.save()
+
+      return {
+        humidity: stats.data.humidity,
+        temp: stats.data.temp,
+        deviceId: deviceId
+      }
     }
   } catch (error) {
     if (error instanceof AxiosError) throw new Error('Cannot send signal !')

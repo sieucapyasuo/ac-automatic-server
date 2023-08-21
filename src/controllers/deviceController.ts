@@ -6,6 +6,7 @@ import deviceService from '@/services/deviceService'
 import { isLinkRequestValid, isSendSignalRequest, isSetDeviceRequestValid } from '@/utils/validateRequest'
 import SetDeviceRequest from '@/models/requests/setDeviceRequest'
 import SendSignalRequest from '@/models/requests/sendSignalRequest'
+import StatsResponse from '@/models/responses/statsResponse'
 
 const getAllDevices = async (_: Request, res: Response) => {
   try {
@@ -64,8 +65,8 @@ const sendSignal = async (req: Request, res: Response) => {
 
 const getStats = async (req: Request, res: Response) => {
   try {
-    await deviceService.getStats(req.params.id)
-    res.json({ message: 'Successfully get stats !' })
+    const stats: StatsResponse | undefined = await deviceService.getStats(req.params.id)
+    res.json(stats)
   } catch (error) {
     if (error instanceof Error) res.status(400).send({ message: error.message })
   }
