@@ -72,4 +72,13 @@ const getStats = async (req: Request, res: Response) => {
   }
 }
 
-export default { getAllDevices, getSingleDevice, linkNewDevice, powerDevice, sendSignal, getStats }
+const testController = async (req: Request, res: Response) => {
+  try {
+    await deviceService.sendEmergencyMail('hello123')
+    res.send('OK')
+  } catch (error) {
+    if (error instanceof Error) res.status(400).send({ message: error.message })
+  }
+}
+
+export default { getAllDevices, getSingleDevice, linkNewDevice, powerDevice, sendSignal, getStats, testController }

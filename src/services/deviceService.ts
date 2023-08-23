@@ -1,6 +1,9 @@
 import axios, { AxiosError, AxiosResponse } from 'axios'
+import { google } from 'googleapis'
+import nodemailer, { TransportOptions } from 'nodemailer'
 
 import { espApiUrl } from '@/constants/espApiUrl'
+import { auth, mailoptions } from '@/constants/email'
 
 import LinkDeviceRequest from '@/models/requests/linkDeviceRequest'
 import DeviceModel, { IDevice } from '@/models/deviceModel'
@@ -9,6 +12,39 @@ import SendSignalRequest from '@/models/requests/sendSignalRequest'
 import StatsResponse from '@/models/responses/statsResponse'
 
 type DeviceList = IDevice[]
+
+const sendEmergencyMail = async (deviceName: string) => {
+  try {
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.CLIENT_ID,
+      process.env.CLIENT_SECRET,
+      process.env.REDIRECT_URI
+    )
+
+    oAuth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN })
+
+    const accessToken = await oAuth2Client.getAccessToken()
+
+    const transport = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        ...auth,
+        accessToken: accessToken
+      }
+    } as TransportOptions)
+
+    const mailOptions = {
+      ...mailoptions,
+      text: `HIGH TEMPERATURE ON DEVICE ${deviceName}`
+    }
+
+    await transport.sendMail(mailOptions)
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 const getDeviceList = async (): Promise<DeviceList> => {
   let deviceList: DeviceList = []
@@ -58,6 +94,8 @@ const sendSignal = async (sendSignalRequest: SendSignalRequest) => {
       device.fan = sendSignalRequest.fan
       device.status = sendSignalRequest.status
 
+      sendSignalRequest.brand = device.brand
+
       device.save()
     }
 
@@ -83,12 +121,14 @@ const getStats = async (deviceId: string) => {
     const device: Device = await DeviceModel.findById(deviceId)
 
     if (device != null) {
-      const stats: AxiosResponse<StatsResponse> = await axios.get(`${espApiUrl}/stats`)
+      const stats: AxiosResponse<StatsResponse> = await axios.get(`${espApiUrl}/stats?deviceId=${deviceId}&userId=test`)
 
       device.envTemp = stats.data.temp
       device.humidity = stats.data.humidity
 
       device.save()
+
+      if (device.envTemp >= 32) await sendEmergencyMail(device.name)
 
       return {
         humidity: stats.data.humidity,
@@ -108,5 +148,6 @@ export default {
   createNewDevice,
   setDevice,
   sendSignal,
-  getStats
+  getStats,
+  sendEmergencyMail
 }

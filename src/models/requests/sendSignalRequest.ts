@@ -1,4 +1,4 @@
-import { FANSPEED, MODE, STATUS } from '@/constants/enum'
+import { BRAND, FANSPEED, MODE, STATUS } from '@/constants/enum'
 
 interface SendSignalRequest {
   userId: string
@@ -7,6 +7,7 @@ interface SendSignalRequest {
   fan: FANSPEED
   status: STATUS
   profile: MODE
+  brand: BRAND
 }
 
 export default SendSignalRequest
